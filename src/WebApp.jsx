@@ -13,6 +13,14 @@ const C = {
   el:"#5F7753",    reg:"#D4D39A",  rl:"#90A982",
 };
 
+/* ── 会員番号を常に5桁ゼロ埋めで表示 ── */
+function padMemberNo(n) {
+  if (!n && n !== 0) return "-----";
+  var num = parseInt(String(n).replace(/\D/g,""), 10);
+  if (isNaN(num)) return String(n);
+  return String(num).padStart(5, "0");
+}
+
 const EVTS = [
   {title:"VECTORプログラム", date:"2026/06-", tag:"教育プログラム", loc:"東京都", price:"¥4,000", s:30, t:60},
   {title:"地方創生ビジネスコンテストin多賀城", date:"日程調整中", tag:"ビジネスコンテスト", loc:"宮城県多賀城市", price:"¥20,000", s:50, t:100},
@@ -408,7 +416,7 @@ function Drawer({ open, onClose }) {
               <div style={{ background:C.dark, borderRadius:14, padding:"20px", marginBottom:14 }}>
                 <div style={{ fontSize:10, color:"rgba(213,212,146,0.55)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:6 }}>Mission</div>
                 <div style={{ fontSize:17, fontWeight:800, color:C.brand, fontFamily:"Georgia,serif", lineHeight:1.5 }}>
-                  地方の魅力をお洒落に、<br/>美しく、上質に、
+                  地方の魅力をお洒落に、美しく、上質に、
                 </div>
               </div>
 
@@ -467,12 +475,14 @@ function Drawer({ open, onClose }) {
                 <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:12, padding:"14px 16px", borderBottom:`1px solid ${C.bdL}` }}>
                   <div style={{ width:46, height:46, borderRadius:"50%", background:C.brand, display:"flex", alignItems:"center", justifyContent:"center", color:C.dark, fontWeight:700, fontSize:17, flexShrink:0 }}>{m.av}</div>
                   <div style={{ flex:1 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:4, gap:6 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6, gap:6 }}>
                       <span style={{ fontSize:14, fontWeight:800, color:C.tx }}>{m.name}</span>
                       {m.since ? <span style={{ fontSize:9, color:C.txS, flexShrink:0, marginTop:2 }}>{m.since}</span> : null}
                     </div>
-                    <div style={{ fontSize:10, color:C.dark, background:C.sfOl, borderRadius:4, padding:"2px 8px", fontWeight:700, display:"inline-block", marginBottom: m.bio ? 5 : 0 }}>{m.role}</div>
-                    {m.bio ? <div style={{ fontSize:11, color:C.txM, lineHeight:1.5, marginTop:4 }}>{m.bio}</div> : null}
+                    <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+                      <div style={{ fontSize:10, color:C.dark, background:C.sfOl, borderRadius:4, padding:"2px 8px", fontWeight:700, flexShrink:0 }}>{m.role}</div>
+                      {m.bio ? <span style={{ fontSize:11, color:C.txS, letterSpacing:"0.01em" }}>{m.bio}</span> : null}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -2582,7 +2592,7 @@ function Profile({ currentPlan, onPlanChange, userProfile, onProfileChange, memb
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
             <div>
               <div style={{ fontSize:11, fontWeight:700, color:C.txS, marginBottom:5 }}>会員番号</div>
-              <div style={{ background:"rgba(17,48,9,0.06)", borderRadius:9, padding:"9px 12px", fontSize:13, fontWeight:700, color:C.txM, border:`1px solid ${C.bdL}`, letterSpacing:"0.1em" }}>{memberNo || "-----"}</div>
+              <div style={{ background:"rgba(17,48,9,0.06)", borderRadius:9, padding:"9px 12px", fontSize:13, fontWeight:700, color:C.txM, border:`1px solid ${C.bdL}`, letterSpacing:"0.1em" }}>{padMemberNo(memberNo)}</div>
             </div>
             <div>
               <div style={{ fontSize:11, fontWeight:700, color:C.txS, marginBottom:5 }}>パスワード</div>
@@ -2699,7 +2709,7 @@ function Profile({ currentPlan, onPlanChange, userProfile, onProfileChange, memb
                 <span style={{ background: isAdmin ? C.brand : C.dark, color: isAdmin ? C.dark : C.brand, fontSize:10, fontWeight:700, borderRadius:4, padding:"2px 9px" }}>
                   {isAdmin ? "▪ Admin" : (PLANS.find(p=>p.planKey===currentPlan)?.name || "Free")}
                 </span>
-                {memberNo && <span style={{ fontSize:9, color: isAdmin ? "rgba(213,212,146,0.5)" : "rgba(17,48,9,0.45)", letterSpacing:"0.05em" }}>No. {memberNo}</span>}
+                {memberNo && <span style={{ fontSize:9, color: isAdmin ? "rgba(213,212,146,0.5)" : "rgba(17,48,9,0.45)", letterSpacing:"0.05em" }}>No. {padMemberNo(memberNo)}</span>}
               </div>
             </div>
           </div>
@@ -3166,10 +3176,10 @@ function AuthScreen({ onLogin }) {
         </div>
         <div style={{background:C.dark,borderRadius:14,padding:"20px",textAlign:"center",marginBottom:20}}>
           <div style={{fontSize:10,color:"rgba(213,212,146,0.6)",letterSpacing:"0.15em",marginBottom:6}}>あなたの会員番号</div>
-          <div style={{fontSize:36,fontWeight:900,color:C.brand,fontFamily:"Georgia,serif",letterSpacing:"0.1em"}}>{reg._memberNo}</div>
+          <div style={{fontSize:36,fontWeight:900,color:C.brand,fontFamily:"Georgia,serif",letterSpacing:"0.1em"}}>{padMemberNo(reg._memberNo)}</div>
           <div style={{fontSize:10,color:"rgba(213,212,146,0.5)",marginTop:6}}>この番号はログインに必要です。必ず控えておいてください。</div>
         </div>
-        <button onClick={()=>onLogin({memberNo:reg._memberNo,name:reg.name,furigana:reg.furigana,birthdate:reg.birthdate,gender:reg.gender,occupation:reg.occupation,affiliation:reg.affiliation,location:reg.location,grade:reg.grade,plan:"free",isAdmin:false,email:reg.email})}
+        <button onClick={()=>onLogin({memberNo:padMemberNo(reg._memberNo),name:reg.name,furigana:reg.furigana,birthdate:reg.birthdate,gender:reg.gender,occupation:reg.occupation,affiliation:reg.affiliation,location:reg.location,grade:reg.grade,plan:"free",isAdmin:false,email:reg.email})}
           style={btnPrimary()}>
           サイトへ進む
         </button>
@@ -3368,7 +3378,7 @@ export default function App() {
         location:    user.location    || "",
         grade:       user.grade       || "",
         email:       user.email       || "",
-        memberNo:    user.memberNo    || "",
+        memberNo:    padMemberNo(user.memberNo),  // 常に5桁ゼロ埋め
       }));
     }} />;
   }
