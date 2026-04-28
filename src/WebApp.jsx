@@ -2368,6 +2368,123 @@ function Profile({ currentPlan, onPlanChange, userProfile, onProfileChange, memb
     );
   }
 
+  /* ── 退会申請画面 ── */
+  if (sec === "withdraw") {
+    const [wName,    setWName]    = React.useState(pf.name || "");
+    const [wReason,  setWReason]  = React.useState("");
+    const [wSince,   setWSince]   = React.useState("");
+    const [wLoading, setWLoading] = React.useState(false);
+    const [wDone,    setWDone]    = React.useState(false);
+    const [wError,   setWError]   = React.useState("");
+
+    async function handleWithdraw() {
+      if (!wName || !wReason || !wSince) { setWError("全ての項目を入力してください"); return; }
+      setWLoading(true); setWError("");
+      try {
+        const params = new URLSearchParams({
+          action:      "withdraw",
+          memberNo:    memberNo || "",
+          name:        wName,
+          reason:      wReason,
+          since:       wSince,
+          email:       pf.email || "",
+        });
+        await fetch(
+          `https://script.google.com/macros/s/AKfycbwg3UYJr4GByIUPBYT8jE-7MZ0JamdDagNV1ZXI1UNBbHKCHfgKOD5DxS0mQNKVnwqW/exec?` + params.toString(),
+          { method:"GET" }
+        );
+        setWDone(true);
+      } catch(e) {
+        setWError("送信エラーが発生しました。しばらく後に再試行してください。");
+      }
+      setWLoading(false);
+    }
+
+    if (wDone) return (
+      <div style={{ height:"100%", display:"flex", flexDirection:"column", background:C.bg }}>
+        <div style={{ flexShrink:0, height:52, display:"flex", alignItems:"center", gap:11, padding:"0 16px", background:C.sf, borderBottom:`1px solid ${C.bd}` }}>
+          <button onClick={()=>setSec(null)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex" }}><Ic n="chevL" s={22} c={C.tx} /></button>
+          <span style={{ fontSize:15, fontWeight:700, color:C.tx }}>退会申請</span>
+        </div>
+        <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"24px" }}>
+          <div style={{ width:64, height:64, borderRadius:"50%", background:"#FFF8F0", border:"2px solid #C07030", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:20 }}>
+            <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#C07030" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style={{ fontSize:16, fontWeight:800, color:C.tx, marginBottom:10 }}>退会申請を受け付けました</div>
+          <div style={{ fontSize:12, color:C.txS, lineHeight:1.8, textAlign:"center" }}>
+            運営側で確認後、承認いたします。<br/>
+            承認完了後にご連絡いたします。<br/>
+            しばらくお待ちください。
+          </div>
+        </div>
+      </div>
+    );
+
+    return (
+      <div style={{ height:"100%", display:"flex", flexDirection:"column", background:C.bg }}>
+        <div style={{ flexShrink:0, height:52, display:"flex", alignItems:"center", gap:11, padding:"0 16px", background:C.sf, borderBottom:`1px solid ${C.bd}` }}>
+          <button onClick={()=>setSec(null)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex" }}><Ic n="chevL" s={22} c={C.tx} /></button>
+          <span style={{ fontSize:15, fontWeight:700, color:C.tx }}>退会申請</span>
+        </div>
+        <div style={{ flex:1, overflowY:"auto", WebkitOverflowScrolling:"touch", padding:"14px" }}>
+          {/* 注意書き */}
+          <div style={{ background:"#FFF8F0", borderRadius:12, padding:"14px 16px", marginBottom:16, border:"1px solid #F0D0A0" }}>
+            <div style={{ fontSize:12, fontWeight:700, color:"#C07030", marginBottom:6 }}>退会申請前にご確認ください</div>
+            <div style={{ fontSize:11, color:"#8A5020", lineHeight:1.8 }}>
+              · 退会申請後、運営側で確認・承認いたします<br/>
+              · 承認後、スプレッドシートのデータが消去されます<br/>
+              · 退会後の再入会は新規登録となります
+            </div>
+          </div>
+          {/* フォーム */}
+          <div style={{ background:C.sf, borderRadius:13, padding:"16px", border:`1px solid ${C.bd}`, marginBottom:14 }}>
+            <div style={{ fontSize:10, color:C.txS, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:14 }}>退会申請フォーム</div>
+            {/* 氏名 */}
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:C.tx, marginBottom:6 }}>氏名 <span style={{ color:C.red }}>*</span></div>
+              <input value={wName} onChange={e=>setWName(e.target.value)} placeholder="地方 創生"
+                style={{ width:"100%", borderRadius:9, border:`1px solid ${wName?C.dark:C.bd}`, padding:"10px 12px", fontSize:12, color:C.tx, background:C.sfOl, boxSizing:"border-box", fontFamily:"inherit", outline:"none" }}/>
+            </div>
+            {/* 会員開始年月 */}
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:C.tx, marginBottom:6 }}>会員開始年月 <span style={{ color:C.red }}>*</span></div>
+              <input type="month" value={wSince} onChange={e=>setWSince(e.target.value)}
+                style={{ width:"100%", borderRadius:9, border:`1px solid ${wSince?C.dark:C.bd}`, padding:"10px 12px", fontSize:12, color:C.tx, background:C.sfOl, boxSizing:"border-box", fontFamily:"inherit", outline:"none" }}/>
+              <div style={{ fontSize:9, color:C.txS, marginTop:4 }}>会員登録を開始した年月を選択してください</div>
+            </div>
+            {/* 退会理由 */}
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:C.tx, marginBottom:6 }}>退会理由 <span style={{ color:C.red }}>*</span></div>
+              <select value={wReason} onChange={e=>setWReason(e.target.value)}
+                style={{ width:"100%", borderRadius:9, border:`1px solid ${wReason?C.dark:C.bd}`, padding:"10px 12px", fontSize:12, color:C.tx, background:C.sfOl, boxSizing:"border-box", fontFamily:"inherit", outline:"none", cursor:"pointer", marginBottom:8 }}>
+                <option value="">選択してください</option>
+                <option value="費用面の理由">費用面の理由</option>
+                <option value="活動内容が合わなかった">活動内容が合わなかった</option>
+                <option value="時間が取れなくなった">時間が取れなくなった</option>
+                <option value="目的を達成した">目的を達成した</option>
+                <option value="他のコミュニティに移る">他のコミュニティに移る</option>
+                <option value="その他">その他</option>
+              </select>
+              <textarea value={wReason==="その他"||wReason?wReason:""}
+                onChange={e=>setWReason(e.target.value)}
+                placeholder="詳細な理由があればご記入ください（任意）"
+                rows={3}
+                style={{ width:"100%", borderRadius:9, border:`1px solid ${C.bd}`, padding:"10px 12px", fontSize:11, color:C.tx, background:C.sfOl, boxSizing:"border-box", fontFamily:"inherit", outline:"none", resize:"vertical" }}/>
+            </div>
+          </div>
+          {wError && <div style={{ fontSize:11, color:C.red, marginBottom:10, padding:"8px 12px", background:"#FFF0F0", borderRadius:8 }}>{wError}</div>}
+          <button onClick={handleWithdraw} disabled={wLoading || !wName || !wReason || !wSince}
+            style={{ width:"100%", padding:"13px", borderRadius:10, border:"none", background:(!wName||!wReason||!wSince)?"#C0C8A0":"#C07030", color:(!wName||!wReason||!wSince)?"#888":"#fff", fontSize:13, fontWeight:700, cursor:(!wName||!wReason||!wSince)?"default":"pointer", marginBottom:8 }}>
+            {wLoading ? "送信中..." : "退会申請を送信する"}
+          </button>
+          <button onClick={()=>setSec(null)} style={{ width:"100%", padding:"10px", borderRadius:9, border:"none", background:"none", color:C.txS, fontSize:12, cursor:"pointer" }}>
+            キャンセル
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (sec === "edit") return (
     <div style={{ height:"100%", display:"flex", flexDirection:"column", background:C.bg }}>
       <div style={{ flexShrink:0, height:52, display:"flex", alignItems:"center", gap:11, padding:"0 16px", background:C.sf, borderBottom:`1px solid ${C.bd}` }}>
@@ -2625,6 +2742,20 @@ function Profile({ currentPlan, onPlanChange, userProfile, onProfileChange, memb
               ) : inner;
             })}
           </div>
+          {/* 退会申請（管理者以外のみ表示） */}
+          {!isAdmin && (
+            <div style={{ background:C.sf, borderRadius:12, border:`1px solid ${C.bd}`, marginBottom:10 }}>
+              <div onClick={()=>setSec("withdraw")} style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", cursor:"pointer" }}>
+                <div style={{ width:35, height:35, borderRadius:9, background:"#FFF8F0", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <Ic n="shield" s={16} c="#C07030" />
+                </div>
+                <div>
+                  <div style={{ fontSize:12, color:"#C07030", fontWeight:600 }}>退会申請</div>
+                  <div style={{ fontSize:10, color:C.txS, marginTop:1 }}>退会をご希望の方はこちら</div>
+                </div>
+              </div>
+            </div>
+          )}
           {/* 管理者モード解除 or 通常ログアウト */}
           <div style={{ background:C.sf, borderRadius:12, border:`1px solid ${C.bd}` }}>
             <div onClick={isAdmin ? handleAdminLogout : onLogout} style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", cursor:"pointer" }}>
