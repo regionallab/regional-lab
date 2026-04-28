@@ -2221,6 +2221,14 @@ function Profile({ currentPlan, onPlanChange, userProfile, onProfileChange, memb
   const [pfSaved, setPfSaved] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(userProfile?.avatar || null);
 
+  /* ── 退会申請 state（条件分岐より前に定義必須） ── */
+  const [wName,    setWName]    = useState(pf.name || "");
+  const [wReason,  setWReason]  = useState("");
+  const [wSince,   setWSince]   = useState("");
+  const [wLoading, setWLoading] = useState(false);
+  const [wDone,    setWDone]    = useState(false);
+  const [wError,   setWError]   = useState("");
+
   /* ── 管理者モード ── */
   const isAdmin  = currentPlan === "admin";
   function handleAdminLogout() { onPlanChange("free"); }
@@ -2370,13 +2378,6 @@ function Profile({ currentPlan, onPlanChange, userProfile, onProfileChange, memb
 
   /* ── 退会申請画面 ── */
   if (sec === "withdraw") {
-    const [wName,    setWName]    = React.useState(pf.name || "");
-    const [wReason,  setWReason]  = React.useState("");
-    const [wSince,   setWSince]   = React.useState("");
-    const [wLoading, setWLoading] = React.useState(false);
-    const [wDone,    setWDone]    = React.useState(false);
-    const [wError,   setWError]   = React.useState("");
-
     async function handleWithdraw() {
       if (!wName || !wReason || !wSince) { setWError("全ての項目を入力してください"); return; }
       setWLoading(true); setWError("");
