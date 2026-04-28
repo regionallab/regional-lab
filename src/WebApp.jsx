@@ -2816,7 +2816,7 @@ function AuthScreen({ onLogin }) {
   /* ── 会員登録フォーム state ── */
   const [reg, setReg] = useState({
     name:"", furigana:"", birthdate:"", gender:"",
-    occupation:"", affiliation:"", location:"",
+    occupation:"", affiliation:"", location:"", grade:"",
     email:"", password:"", passwordConfirm:""
   });
   const setR = (k,v) => setReg(p=>({...p,[k]:v}));
@@ -2893,6 +2893,7 @@ function AuthScreen({ onLogin }) {
         occupation:  reg.occupation  || "",
         affiliation: reg.affiliation || "",
         location:    reg.location    || "",
+        grade:       reg.grade       || "",
         email:       reg.email,
         password:    reg.password,
       });
@@ -3036,7 +3037,7 @@ function AuthScreen({ onLogin }) {
           <div style={{fontSize:36,fontWeight:900,color:C.brand,fontFamily:"Georgia,serif",letterSpacing:"0.1em"}}>{reg._memberNo}</div>
           <div style={{fontSize:10,color:"rgba(213,212,146,0.5)",marginTop:6}}>この番号はログインに必要です。必ず控えておいてください。</div>
         </div>
-        <button onClick={()=>onLogin({memberNo:reg._memberNo,name:reg.name,plan:"free",isAdmin:false,email:reg.email})}
+        <button onClick={()=>onLogin({memberNo:reg._memberNo,name:reg.name,furigana:reg.furigana,birthdate:reg.birthdate,gender:reg.gender,occupation:reg.occupation,affiliation:reg.affiliation,location:reg.location,grade:reg.grade,plan:"free",isAdmin:false,email:reg.email})}
           style={btnPrimary()}>
           サイトへ進む
         </button>
@@ -3104,9 +3105,35 @@ function AuthScreen({ onLogin }) {
               </div>
             </div>
             {/* 居住地 */}
-            <div style={{marginBottom:20}}>
+            <div style={{marginBottom:12}}>
               <label style={labelStyle}>居住地</label>
               <input value={reg.location} onChange={e=>setR("location",e.target.value)} placeholder="新潟県南魚沼市" style={inputStyle(reg.location)}/>
+            </div>
+            {/* 学年 */}
+            <div style={{marginBottom:20}}>
+              <label style={labelStyle}>学年・学歴</label>
+              <select value={reg.grade} onChange={e=>setR("grade",e.target.value)}
+                style={{...inputStyle(reg.grade),cursor:"pointer"}}>
+                <option value="">選択してください</option>
+                <optgroup label="大学">
+                  <option value="大学1年生">大学1年生</option>
+                  <option value="大学2年生">大学2年生</option>
+                  <option value="大学3年生">大学3年生</option>
+                  <option value="大学4年生">大学4年生</option>
+                </optgroup>
+                <optgroup label="大学院">
+                  <option value="修士1年">修士1年（M1）</option>
+                  <option value="修士2年">修士2年（M2）</option>
+                  <option value="博士課程">博士課程</option>
+                </optgroup>
+                <optgroup label="その他">
+                  <option value="高校生">高校生</option>
+                  <option value="専門学校生">専門学校生</option>
+                  <option value="社会人">社会人</option>
+                  <option value="既卒">既卒</option>
+                  <option value="その他">その他</option>
+                </optgroup>
+              </select>
             </div>
             {error && <div style={{fontSize:11,color:"#C04040",marginBottom:8,padding:"8px 12px",background:"#FFF0F0",borderRadius:8}}>{error}</div>}
             <button onClick={()=>{
@@ -3180,7 +3207,7 @@ export default function App() {
   );
   const [userProfile, setUserProfile] = useState({
     name:"", furigana:"", birthdate:"", gender:"",
-    occupation:"", affiliation:"", location:"", email:"",
+    occupation:"", affiliation:"", location:"", grade:"", email:"",
     memberNo:"", avatar: null,
   });
 
@@ -3207,6 +3234,7 @@ export default function App() {
         occupation:  user.occupation  || "",
         affiliation: user.affiliation || "",
         location:    user.location    || "",
+        grade:       user.grade       || "",
         email:       user.email       || "",
         memberNo:    user.memberNo    || "",
       }));
@@ -3253,7 +3281,7 @@ export default function App() {
       setAuthUser(null);
       setCurrentPlan("free");
       setTab("home");
-      setUserProfile({ name:"", furigana:"", birthdate:"", gender:"", occupation:"", affiliation:"", location:"", email:"", memberNo:"", avatar:null });
+      setUserProfile({ name:"", furigana:"", birthdate:"", gender:"", occupation:"", affiliation:"", location:"", grade:"", email:"", memberNo:"", avatar:null });
     }} />;
     return null;
   }
