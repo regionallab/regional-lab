@@ -22,7 +22,7 @@ function padMemberNo(n) {
 }
 
 const EVTS = [
-  {title:"VECTORプログラム", date:"2026/06-", tag:"教育プログラム", loc:"東京都", price:"¥4,000", s:30, t:60},
+  {title:"VECTORプログラム", date:"2026/06-", tag:"教育プログラム", loc:"東京都", price:"¥4,000", s:30, t:60, applyUrl:"https://forms.gle/qiRZTyWzqWJpwiCV7"},
   {title:"地方創生ビジネスコンテストin多賀城", date:"日程調整中", tag:"ビジネスコンテスト", loc:"宮城県多賀城市", price:"¥20,000", s:50, t:100},
 ];
 const PRODS = [
@@ -546,7 +546,14 @@ function Home({ onMenuOpen }) {
                 <div style={{ height:3, background:C.bdL, borderRadius:2 }}>
                   <div style={{ height:"100%", width:`${(e.t-e.s)/e.t*100}%`, background:C.dark, borderRadius:2 }} />
                 </div>
-                <button style={{ width:"100%", marginTop:10, padding:"9px", borderRadius:9, border:"none", background:C.dark, color:C.sf, fontSize:13, fontWeight:700, cursor:"pointer" }}>申し込む</button>
+                {e.applyUrl ? (
+                  <a href={e.applyUrl} target="_blank" rel="noreferrer"
+                    style={{ display:"block", width:"100%", marginTop:10, padding:"9px", borderRadius:9, border:"none", background:C.dark, color:C.sf, fontSize:13, fontWeight:700, cursor:"pointer", textAlign:"center", textDecoration:"none", boxSizing:"border-box" }}>
+                    申し込む
+                  </a>
+                ) : (
+                  <button style={{ width:"100%", marginTop:10, padding:"9px", borderRadius:9, border:"none", background:C.dark, color:C.sf, fontSize:13, fontWeight:700, cursor:"pointer" }}>申し込む</button>
+                )}
               </div>
             </div>
           ))}
