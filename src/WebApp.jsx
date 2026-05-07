@@ -2653,9 +2653,8 @@ function Profile({ currentPlan, onPlanChange, userProfile, onProfileChange, memb
               {!isCurrent && (
                 pl.stripe ? (
                   <a href={pl.stripe} target="_blank" rel="noreferrer"
-                    onClick={()=>onPlanChange(pl.planKey)}
                     style={{ display:"block", width:"100%", marginTop:10, padding:"12px", borderRadius:9, border:"none", background:C.dark, color:C.brand, fontSize:13, fontWeight:700, cursor:"pointer", textAlign:"center", textDecoration:"none", boxSizing:"border-box" }}>
-                    → Stripeで決済する
+                    → Stripeで決済ページへ
                   </a>
                 ) : (
                   <button
@@ -2664,6 +2663,15 @@ function Profile({ currentPlan, onPlanChange, userProfile, onProfileChange, memb
                     このプランに変更
                   </button>
                 )
+              )}
+              {/* Stripe決済後の案内 */}
+              {!isCurrent && pl.stripe && (
+                <div style={{ marginTop:8, padding:"8px 10px", background:"#FFFBEE", borderRadius:8, border:"1px solid #F0E090" }}>
+                  <div style={{ fontSize:10, color:"#806000", lineHeight:1.6 }}>
+                    決済完了後、運営側で確認次第プランを付与いたします。<br/>
+                    通常1〜2営業日以内にご連絡いたします。
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -3010,9 +3018,48 @@ function AuthScreen({ onLogin }) {
 
   /* ── 会員登録処理（GASへ直接フォーム送信） ── */
   async function handleRegister() {
-    if (!reg.name||!reg.furigana||!reg.email||!reg.password||!reg.passwordConfirm) {
+    /* ── バリデーション ── */
+    const trim = (s) => (s || "").trim();
+
+    // 必須チェック
+    if (!trim(reg.name)||!trim(reg.furigana)||!trim(reg.email)||!reg.password||!reg.passwordConfirm) {
       setError("必須項目をすべて入力してください"); return;
     }
+    // 氏名：2文字以上・数字のみNG・記号のみNG・スペースのみNG
+    const nameVal = trim(reg.name);
+    if (nameVal.length < 2) {
+      setError("氏名は2文字以上で入力してください"); return;
+    }
+    if (/^[0-9\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/.test(nameVal)) {
+      setError("氏名に正しいお名前を入力してください"); return;
+    }
+    if (/^[a-zA-Z]$/.test(nameVal)) {
+      setError("氏名は1文字のみは使用できません"); return;
+    }
+    // フリガナ：カタカナ・ひらがな・スペースのみ・2文字以上
+    const furiganaVal = trim(reg.furigana);
+    if (furiganaVal.length < 2) {
+      setError("フリガナは2文字以上で入力してください"); return;
+    }
+    if (!/^[\u3040-\u309F\u30A0-\u30FF\s　]+$/.test(furiganaVal)) {
+      setError("フリガナはひらがな・カタカナで入力してください"); return;
+    }
+    // メールアドレス：形式チェック
+    const emailVal = trim(reg.email);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(emailVal)) {
+      setError("正しいメールアドレスを入力してください（例：example@gmail.com）"); return;
+    }
+    // メールアドレス：明らかなテスト入力をNG
+    const fakeEmails = ["test@test.com","aaa@aaa.com","a@a.com","test@test.jp"];
+    if (fakeEmails.includes(emailVal.toLowerCase())) {
+      setError("有効なメールアドレスを入力してください"); return;
+    }
+    // 氏名：1文字の繰り返しをNG（例：「ああああ」「aaaa」）
+    if (/^(.)\1{2,}$/.test(nameVal.replace(/\s/g,""))) {
+      setError("正しいお名前を入力してください"); return;
+    }
+    // パスワード：4桁数字
     if (!/^\d{4}$/.test(reg.password)) {
       setError("パスワードは4桁の数字で入力してください"); return;
     }
@@ -3210,11 +3257,19 @@ function AuthScreen({ onLogin }) {
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
               <div>
                 <label style={labelStyle}>氏名 <span style={{color:"#C04040"}}>*</span></label>
-                <input value={reg.name} onChange={e=>setR("name",e.target.value)} placeholder="地方 創生" style={inputStyle(reg.name)}/>
+                <input value={reg.name} onChange={e=>setR("name",e.target.value)} placeholder="例：木寺 蒼真" style={inputStyle(reg.name)}/>
+                <div style={{fontSize:9,color:"#6A8060",marginTop:3}}>姓と名の間にスペースを入れてください</div>
               </div>
               <div>
                 <label style={labelStyle}>フリガナ <span style={{color:"#C04040"}}>*</span></label>
-                <input value={reg.furigana} onChange={e=>setR("furigana",e.target.value)} placeholder="チホウ ソウセイ" style={inputStyle(reg.furigana)}/>
+                <input value={reg.furigana} onChange={e=>setR("furigana",e.target.value)} placeholder="例：キデラ ソウマ" style={{
+                  ...inputStyle(reg.furigana),
+                  borderColor: reg.furigana && !/^[\u3040-\u309F\u30A0-\u30FF\s　]+$/.test(reg.furigana) ? "#C04040" : reg.furigana ? C.dark : "rgba(17,48,9,0.2)"
+                }}/>
+                {reg.furigana && !/^[\u3040-\u309F\u30A0-\u30FF\s　]+$/.test(reg.furigana)
+                  ? <div style={{fontSize:9,color:"#C04040",marginTop:3}}>ひらがな・カタカナで入力してください</div>
+                  : <div style={{fontSize:9,color:"#6A8060",marginTop:3}}>ひらがな・カタカナで入力</div>
+                }
               </div>
             </div>
             {/* 生年月日・性別 */}
@@ -3279,7 +3334,12 @@ function AuthScreen({ onLogin }) {
             </div>
             {error && <div style={{fontSize:11,color:"#C04040",marginBottom:8,padding:"8px 12px",background:"#FFF0F0",borderRadius:8}}>{error}</div>}
             <button onClick={()=>{
-              if(!reg.name||!reg.furigana){setError("氏名・フリガナは必須です");return;}
+              const trim = (s) => (s||"").trim();
+              if(!trim(reg.name)||!trim(reg.furigana)){setError("氏名・フリガナは必須です");return;}
+              if(trim(reg.name).length < 2){setError("氏名は2文字以上で入力してください");return;}
+              if(/^\d+$/.test(trim(reg.name))){setError("氏名に数字のみは使用できません");return;}
+              if(trim(reg.furigana).length < 2){setError("フリガナは2文字以上で入力してください");return;}
+              if(/[a-zA-Z0-9！-～]/.test(trim(reg.furigana))){setError("フリガナはひらがな・カタカナで入力してください");return;}
               setError("");setStep(2);
             }} style={btnPrimary(!reg.name||!reg.furigana)}>
               次へ →
